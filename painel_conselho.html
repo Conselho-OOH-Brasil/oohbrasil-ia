@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel do Conselho · OOH Brasil · IA</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#0D6EFF;--blue-dark:#0A58CC;--blue-deep:#0847A8;
+  --yellow:#FFE900;--green:#44D62C;--pink:#FF1969;
+  --white:#fff;
+  --w10:rgba(255,255,255,.10);--w20:rgba(255,255,255,.20);
+  --w40:rgba(255,255,255,.40);--w70:rgba(255,255,255,.70);
+}
+html,body{background:#0D6EFF;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#fff;min-height:100vh}
+
+/* COLOR BAR */
+.color-bar{height:5px;display:flex}
+.cb1{background:#0D6EFF;flex:4}.cb2{background:#FFE900;flex:2}
+.cb3{background:#fff;flex:.5}.cb4{background:#44D62C;flex:1}.cb5{background:#FF1969;flex:.5}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
+.login-box{background:#0847A8;border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:380px;text-align:center}
+.login-logo{height:36px;margin-bottom:1.25rem}
+.login-badge{display:inline-block;background:#FFE900;color:#0847A8;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;border-radius:20px;padding:4px 14px;margin-bottom:1.5rem}
+.login-title{font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:-.01em;margin-bottom:.4rem}
+.login-sub{font-size:12px;color:var(--w70);margin-bottom:1.75rem;line-height:1.6}
+.login-input{width:100%;border:2px solid rgba(255,255,255,.25);border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;color:#fff;background:rgba(255,255,255,.08);outline:none;text-align:center;letter-spacing:.1em;margin-bottom:.75rem}
+.login-input:focus{border-color:#FFE900}
+.login-input::placeholder{color:rgba(255,255,255,.25);letter-spacing:0}
+.login-btn{width:100%;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:900;cursor:pointer;background:#FFE900;color:#0847A8;font-family:inherit;letter-spacing:.06em;text-transform:uppercase;transition:background .15s}
+.login-btn:hover{background:#CDB900}
+.login-err{font-size:12px;color:#FF1969;margin-top:.5rem;font-weight:700;min-height:18px}
+
+/* PAINEL */
+#painel{display:none}
+.header{background:#0847A8;padding:1.25rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:.6rem;border-bottom:3px solid #FFE900}
+.header-logo{height:34px}
+.header-badge{display:inline-block;background:#FFE900;color:#0847A8;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;border-radius:20px;padding:4px 14px}
+.header-sub{font-size:11px;color:var(--w70);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+
+.wrap{max-width:900px;margin:0 auto;padding:2rem 1.25rem 4rem}
+
+/* SUMMARY CARDS */
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem;margin-bottom:2rem}
+.sum-card{background:#0847A8;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:1rem 1.25rem;text-align:center}
+.sum-num{font-size:28px;font-weight:900;color:#FFE900;line-height:1}
+.sum-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--w70);margin-top:.35rem}
+
+/* EMPRESA DIAGNOSTICO */
+.empresa-box{border-radius:12px;padding:1.5rem;margin-bottom:2rem;border-left:5px solid transparent}
+.eb-ausente{background:rgba(255,255,255,.07);border-left-color:rgba(255,255,255,.3)}
+.eb-incipiente{background:rgba(255,233,0,.07);border-left-color:#FFE900}
+.eb-construcao{background:rgba(68,214,44,.07);border-left-color:#44D62C}
+.eb-aceleradora{background:rgba(255,25,105,.07);border-left-color:#FF1969}
+.eb-tag{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#FFE900;margin-bottom:.4rem}
+.eb-title{font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:-.01em;margin-bottom:.3rem}
+.eb-nota{font-size:13px;color:var(--w70);margin-bottom:.75rem;font-weight:600}
+.eb-desc{font-size:13px;color:var(--w70);line-height:1.7;margin-bottom:.75rem}
+.eb-alerta{background:rgba(0,0,0,.2);border-radius:8px;padding:.75rem 1rem;font-size:12px;color:rgba(255,255,255,.8);line-height:1.6;font-style:italic}
+
+/* FAIXAS CHART */
+.section-title{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#FFE900;margin-bottom:1rem}
+.faixas-chart{margin-bottom:2rem}
+.faixa-bar-row{display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem}
+.faixa-bar-label{font-size:11px;font-weight:700;color:#fff;width:180px;flex-shrink:0;text-transform:uppercase;letter-spacing:.03em}
+.faixa-bar-track{flex:1;height:28px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;position:relative}
+.faixa-bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-size:11px;font-weight:900;color:#0847A8;min-width:28px;transition:width .6s ease}
+.faixa-bar-count{font-size:11px;font-weight:700;color:var(--w70);width:24px;text-align:right;flex-shrink:0}
+
+/* TABELA DE DIRETORES */
+.table-wrap{overflow-x:auto;margin-bottom:2rem}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{background:#0847A8;border-bottom:2px solid #FFE900}
+thead th{padding:10px 12px;text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#FFE900;white-space:nowrap}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.08);transition:background .1s}
+tbody tr:hover{background:rgba(255,255,255,.04)}
+tbody td{padding:10px 12px;color:var(--w70);vertical-align:top}
+tbody td:first-child{font-weight:700;color:#fff}
+.faixa-pill{display:inline-block;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.fp-branca{background:rgba(255,255,255,.15);color:#fff}
+.fp-amarela{background:rgba(255,233,0,.2);color:#FFE900}
+.fp-verde{background:rgba(68,214,44,.2);color:#44D62C}
+.fp-rosa{background:rgba(255,25,105,.2);color:#FF1969}
+.fp-preta{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.5)}
+
+/* DORES RANKING */
+.dores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.6rem;margin-bottom:2rem}
+.dor-rank-item{background:#0847A8;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.85rem 1rem;display:flex;align-items:center;gap:.75rem}
+.dor-rank-num{width:28px;height:28px;border-radius:50%;background:#FFE900;color:#0847A8;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dor-rank-text{flex:1}
+.dor-rank-name{font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.03em}
+.dor-rank-count{font-size:10px;color:var(--w70);margin-top:2px}
+
+/* LOADING / ERROR */
+.loading{text-align:center;padding:3rem;color:var(--w70);font-size:14px;font-weight:600}
+.error-msg{background:rgba(255,25,105,.1);border:1px solid rgba(255,25,105,.3);border-radius:10px;padding:1rem;font-size:13px;color:#FF1969;font-weight:700;text-align:center;margin-bottom:1rem}
+
+.refresh-btn{border:2px solid rgba(255,255,255,.3);border-radius:8px;padding:8px 18px;font-size:11px;font-weight:800;cursor:pointer;background:transparent;color:var(--w70);font-family:inherit;text-transform:uppercase;letter-spacing:.05em;transition:all .15s;margin-bottom:1.5rem}
+.refresh-btn:hover{border-color:#FFE900;color:#FFE900}
+
+.footer{text-align:center;padding:2rem 0 1rem;border-top:1px solid rgba(255,255,255,.1);margin-top:1rem}
+.footer img{height:22px;opacity:.35}
+</style>
+</head>
+<body>
+
+<div class="color-bar"><div class="cb1"></div><div class="cb2"></div><div class="cb3"></div><div class="cb4"></div><div class="cb5"></div></div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <img class="login-logo" src="https://cdn.prod.website-files.com/645ea87fa38858c299a81a42/68e9885b66c8497531dcc34c_BRANCO_LOGO%20OOH%20BRASIL%20SITE.svg" alt="OOH Brasil" onerror="this.outerHTML='<div style=\'font-size:18px;font-weight:900;color:#fff;margin-bottom:1rem\'>OOH BRASIL</div>'">
+    <div class="login-badge">Conselho Administrativo</div>
+    <div class="login-title">Painel de Resultados</div>
+    <div class="login-sub">Diagnóstico de maturidade em IA<br>Abril 2025 · Acesso restrito</div>
+    <input class="login-input" type="password" id="senha" placeholder="Digite a senha" onkeydown="if(event.key==='Enter')login()">
+    <button class="login-btn" onclick="login()">Acessar Painel →</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- PAINEL -->
+<div id="painel">
+  <div class="header">
+    <img class="header-logo" src="https://cdn.prod.website-files.com/645ea87fa38858c299a81a42/68e9885b66c8497531dcc34c_BRANCO_LOGO%20OOH%20BRASIL%20SITE.svg" alt="OOH Brasil" onerror="this.outerHTML='<div style=\'font-size:16px;font-weight:900;color:#fff\'>OOH BRASIL</div>'">
+    <div class="header-badge">Conselho Administrativo · Painel de IA</div>
+    <div class="header-sub">Diagnóstico de maturidade · Abril 2025</div>
+  </div>
+
+  <div class="wrap">
+    <button class="refresh-btn" onclick="carregarDados()">↻ Atualizar respostas</button>
+    <div id="conteudo"><div class="loading">Carregando respostas...</div></div>
+    <div class="footer">
+      <img src="https://cdn.prod.website-files.com/645ea87fa38858c299a81a42/68e9885b66c8497531dcc34c_BRANCO_LOGO%20OOH%20BRASIL%20SITE.svg" alt="OOH Brasil" onerror="this.style.display='none'">
+      <div style="font-size:11px;color:rgba(255,255,255,.25);margin-top:.5rem">Conselho Administrativo · Acesso restrito</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SENHA = "00hbr@sil2026";
+const SHEET_URL = "https://sheetdb.io/api/v1/zcwbo5ibo6n6e";
+
+const FAIXAS_DEF = [
+  {id:"branca",nome:"Faixa Branca — Observador",cls:"fp-branca",bar:"rgba(255,255,255,0.6)"},
+  {id:"amarela",nome:"Faixa Amarela — Explorador",cls:"fp-amarela",bar:"#FFE900"},
+  {id:"verde",nome:"Faixa Verde — Praticante",cls:"fp-verde",bar:"#44D62C"},
+  {id:"rosa",nome:"Faixa Rosa — Multiplicador",cls:"fp-rosa",bar:"#FF1969"},
+  {id:"preta",nome:"Faixa Preta — Arquiteto",cls:"fp-preta",bar:"rgba(255,255,255,0.9)"}
+];
+
+function login() {
+  const val = document.getElementById("senha").value;
+  const err = document.getElementById("login-err");
+  if(val === SENHA) {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("painel").style.display = "block";
+    carregarDados();
+  } else {
+    err.textContent = "Senha incorreta. Tente novamente.";
+    setTimeout(()=>err.textContent="", 3000);
+  }
+}
+
+function getFaixaClass(nome) {
+  if(!nome) return "fp-branca";
+  const n = nome.toLowerCase();
+  if(n.includes("arquiteto")||n.includes("preta")) return "fp-preta";
+  if(n.includes("multiplicador")||n.includes("rosa")) return "fp-rosa";
+  if(n.includes("praticante")||n.includes("verde")) return "fp-verde";
+  if(n.includes("explorador")||n.includes("amarela")) return "fp-amarela";
+  return "fp-branca";
+}
+
+function getFaixaId(nome) {
+  if(!nome) return "branca";
+  const n = nome.toLowerCase();
+  if(n.includes("arquiteto")||n.includes("preta")) return "preta";
+  if(n.includes("multiplicador")||n.includes("rosa")) return "rosa";
+  if(n.includes("praticante")||n.includes("verde")) return "verde";
+  if(n.includes("explorador")||n.includes("amarela")) return "amarela";
+  return "branca";
+}
+
+function calcNotaMedia(dados) {
+  const notas = dados.map(d=>parseInt(d.nota_empresa)).filter(n=>!isNaN(n));
+  if(!notas.length) return null;
+  return Math.round((notas.reduce((a,b)=>a+b,0)/notas.length)*10)/10;
+}
+
+function getEmpresaDiag(media) {
+  if(media === null) return null;
+  if(media <= 3) return {
+    cls:"eb-ausente",
+    estagio:"Estágio 1 — Ausente",
+    nota:`Nota média: ${media}/10`,
+    desc:"A empresa ainda não criou nenhuma condição estrutural para o uso de IA. Não há ferramentas, política, treinamento ou direcionamento claro. O uso que existe é iniciativa individual e isolada — e tende a ser inconsistente.",
+    alerta:"Enquanto a concorrência acelera, cada mês sem estrutura é vantagem competitiva perdida. A janela de oportunidade está se fechando."
+  };
+  if(media <= 5) return {
+    cls:"eb-incipiente",
+    estagio:"Estágio 2 — Incipiente",
+    nota:`Nota média: ${media}/10`,
+    desc:"Existe alguma consciência do tema, mas sem estrutura real. A empresa fala de IA mas não financia, não treina e não define política. O resultado é entusiasmo pontual sem transformação real.",
+    alerta:"O time quer avançar mas não tem suporte — o gap entre intenção e realidade cria frustração e estagnação. Vale lembrar: o curso de Formação em IA do G4 Educação foi contratado em novembro de 2024 e ainda não foi concluído pelos diretores."
+  };
+  if(media <= 7) return {
+    cls:"eb-construcao",
+    estagio:"Estágio 3 — Em construção",
+    nota:`Nota média: ${media}/10`,
+    desc:"A empresa reconhece a importância e começa a criar condições. Há iniciativas, mas ainda faltam política clara, ferramentas consolidadas e uma cultura de experimentação estabelecida.",
+    alerta:"O momento é agora — consolidar a estrutura antes que o gap entre áreas se torne um problema de alinhamento estratégico."
+  };
+  return {
+    cls:"eb-aceleradora",
+    estagio:"Estágio 4 — Aceleradora",
+    nota:`Nota média: ${media}/10`,
+    desc:"A empresa é protagonista da transformação — oferece ferramentas, política, treinamento e incentivo real. A IA está na agenda estratégica e o time tem condições de avançar de forma consistente.",
+    alerta:"Próximo passo: sustentar a velocidade, medir resultados e escalar as iniciativas que estão funcionando."
+  };
+}
+
+function contarDores(dados) {
+  const contagem = {};
+  dados.forEach(d=>{
+    if(!d.dores_ranking) return;
+    const dores = d.dores_ranking.split("|").map(x=>x.replace(/^\d+\.\s*/,"").trim()).filter(Boolean);
+    dores.forEach((dor,i)=>{
+      if(!contagem[dor]) contagem[dor] = {total:0, peso:0};
+      contagem[dor].total++;
+      contagem[dor].peso += (dores.length - i);
+    });
+  });
+  return Object.entries(contagem)
+    .sort((a,b)=>b[1].peso-a[1].peso)
+    .slice(0,6)
+    .map(([nome,v],i)=>({pos:i+1,nome,count:v.total,peso:v.peso}));
+}
+
+function renderPainel(dados) {
+  if(!dados || dados.length === 0) {
+    document.getElementById("conteudo").innerHTML = `
+      <div class="error-msg">Nenhuma resposta encontrada ainda. Aguarde os diretores responderem o questionário.</div>`;
+    return;
+  }
+
+  const total = dados.length;
+  const notaMedia = calcNotaMedia(dados);
+  const empresa = getEmpresaDiag(notaMedia);
+  const doresTop = contarDores(dados);
+
+  // contar faixas
+  const faixaCount = {branca:0,amarela:0,verde:0,rosa:0,preta:0};
+  dados.forEach(d=>{ const f = getFaixaId(d.faixa_calculada); faixaCount[f]++; });
+
+  // SUMMARY
+  const freqAlta = dados.filter(d=>["Quase todo dia","Todo dia"].includes(d.frequencia)).length;
+  const mediaFomentoStr = notaMedia !== null ? notaMedia+"/10" : "—";
+
+  let html = `
+  <div class="summary-grid">
+    <div class="sum-card"><div class="sum-num">${total}</div><div class="sum-lbl">Respostas recebidas</div></div>
+    <div class="sum-card"><div class="sum-num">${7-total}</div><div class="sum-lbl">Aguardando resposta</div></div>
+    <div class="sum-card"><div class="sum-num">${mediaFomentoStr}</div><div class="sum-lbl">Nota média da empresa</div></div>
+    <div class="sum-card"><div class="sum-num">${freqAlta}</div><div class="sum-lbl">Usam IA todo dia ou quase</div></div>
+  </div>`;
+
+  // EMPRESA DIAGNOSTICO
+  if(empresa) {
+    html += `
+    <div class="section-title">Diagnóstico da empresa como fomentadora de IA</div>
+    <div class="empresa-box ${empresa.cls}">
+      <div class="eb-tag">OOH Brasil · Estágio atual</div>
+      <div class="eb-title">${empresa.estagio}</div>
+      <div class="eb-nota">${empresa.nota} · com base nas respostas dos diretores</div>
+      <div class="eb-desc">${empresa.desc}</div>
+      <div class="eb-alerta">${empresa.alerta}</div>
+    </div>`;
+  }
+
+  // FAIXAS CHART
+  html += `<div class="section-title">Distribuição de faixas por diretor</div><div class="faixas-chart">`;
+  FAIXAS_DEF.forEach(f=>{
+    const count = faixaCount[f.id]||0;
+    const pct = total > 0 ? Math.round((count/total)*100) : 0;
+    html += `
+    <div class="faixa-bar-row">
+      <div class="faixa-bar-label">${f.nome.split("—")[1]?.trim()||f.nome}</div>
+      <div class="faixa-bar-track">
+        <div class="faixa-bar-fill" style="width:${pct}%;background:${f.bar}">${count > 0 ? count+(count===1?' diretor':' diretores') : ''}</div>
+      </div>
+      <div class="faixa-bar-count">${count}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // TABELA INDIVIDUAL
+  html += `
+  <div class="section-title">Perfil individual por área</div>
+  <div class="table-wrap">
+  <table>
+    <thead><tr>
+      <th>Área</th><th>Faixa</th><th>Frequência</th><th>Nota empresa</th><th>Top dores</th><th>Principais barreiras</th>
+    </tr></thead>
+    <tbody>`;
+
+  dados.forEach(d=>{
+    const fCls = getFaixaClass(d.faixa_calculada);
+    const fNome = d.faixa_calculada ? d.faixa_calculada.split("—")[1]?.trim()||d.faixa_calculada : "—";
+    const dores = d.dores_ranking ? d.dores_ranking.split("|").slice(0,2).map(x=>x.replace(/^\d+\.\s*/,"").trim()).join(", ") : "—";
+    const barr = d.barreiras ? d.barreiras.split(",").slice(0,2).map(x=>x.trim()).join(", ") : "—";
+    html += `<tr>
+      <td>${d.area||"—"}</td>
+      <td><span class="faixa-pill ${fCls}">${fNome}</span></td>
+      <td>${d.frequencia||"—"}</td>
+      <td style="text-align:center;font-weight:700;color:#FFE900">${d.nota_empresa||"—"}</td>
+      <td style="font-size:11px">${dores}</td>
+      <td style="font-size:11px">${barr}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+
+  // DORES MAIS CITADAS
+  if(doresTop.length > 0) {
+    html += `<div class="section-title">Dores mais citadas pela liderança</div><div class="dores-grid">`;
+    doresTop.forEach(d=>{
+      html += `<div class="dor-rank-item">
+        <div class="dor-rank-num">${d.pos}</div>
+        <div class="dor-rank-text">
+          <div class="dor-rank-name">${d.nome}</div>
+          <div class="dor-rank-count">${d.count} área${d.count!==1?"s":""} mencionou</div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // VISOES LIVRES
+  const visoes = dados.filter(d=>d.visao_livre && d.visao_livre.trim().length > 5);
+  if(visoes.length > 0) {
+    html += `<div class="section-title">Visão livre — o que cada área quer resolver com IA</div>`;
+    visoes.forEach(d=>{
+      html += `<div style="background:#0847A8;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:1rem 1.25rem;margin-bottom:.6rem">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#FFE900;margin-bottom:.4rem">${d.area||"—"}</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.8);line-height:1.7">${d.visao_livre}</div>
+      </div>`;
+    });
+  }
+
+  document.getElementById("conteudo").innerHTML = html;
+}
+
+async function carregarDados() {
+  document.getElementById("conteudo").innerHTML = '<div class="loading">Carregando respostas da planilha...</div>';
+  try {
+    const res = await fetch(SHEET_URL + "?limit=50");
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const dados = await res.json();
+    const limpos = dados.filter(d=>d.area && d.area !== "TESTE");
+    renderPainel(limpos);
+  } catch(e) {
+    document.getElementById("conteudo").innerHTML = `
+      <div class="error-msg">Erro ao carregar dados: ${e.message}<br><br>Verifique se a planilha está acessível e tente novamente.</div>`;
+  }
+}
+</script>
+</body>
+</html>
