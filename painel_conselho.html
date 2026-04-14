@@ -70,6 +70,12 @@ html,body{background:#0D6EFF;font-family:'Helvetica Neue',Helvetica,Arial,sans-s
 .faixa-bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-size:11px;font-weight:900;color:#0847A8;min-width:28px;transition:width .6s ease}
 .faixa-bar-count{font-size:11px;font-weight:700;color:var(--w70);width:24px;text-align:right;flex-shrink:0}
 
+.tooltip-wrap{position:relative;display:flex;align-items:center;gap:6px;flex:1}
+.tooltip-icon{width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);cursor:help;flex-shrink:0;transition:all .15s}
+.tooltip-icon:hover{border-color:#FFE900;color:#FFE900}
+.tooltip-box{display:none;position:absolute;left:0;top:28px;background:#0847A8;border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:.75rem 1rem;font-size:12px;color:rgba(255,255,255,.85);line-height:1.6;width:280px;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.tooltip-wrap:hover .tooltip-box{display:block}
+
 /* TABELA DE DIRETORES */
 .table-wrap{overflow-x:auto;margin-bottom:2rem}
 table{width:100%;border-collapse:collapse;font-size:12px}
@@ -145,11 +151,11 @@ const SENHA = "00hbr@sil2026";
 const SHEET_URL = "https://sheetdb.io/api/v1/zcwbo5ibo6n6e";
 
 const FAIXAS_DEF = [
-  {id:"branca",nome:"Faixa Branca — Observador",cls:"fp-branca",bar:"rgba(255,255,255,0.6)",cor:"#fff",corVazio:"rgba(255,255,255,.15)",nivel:1},
-  {id:"amarela",nome:"Faixa Amarela — Explorador",cls:"fp-amarela",bar:"#FFE900",cor:"#FFE900",corVazio:"rgba(255,233,0,.15)",nivel:2},
-  {id:"verde",nome:"Faixa Verde — Praticante",cls:"fp-verde",bar:"#44D62C",cor:"#44D62C",corVazio:"rgba(68,214,44,.15)",nivel:3},
-  {id:"rosa",nome:"Faixa Rosa — Multiplicador",cls:"fp-rosa",bar:"#FF1969",cor:"#FF1969",corVazio:"rgba(255,25,105,.15)",nivel:4},
-  {id:"preta",nome:"Faixa Preta — Arquiteto",cls:"fp-preta",bar:"#000000",cor:"#fff",corVazio:"rgba(255,255,255,.15)",nivel:5}
+  {id:"branca",nome:"Faixa Branca — Observador",cls:"fp-branca",bar:"rgba(255,255,255,0.6)",cor:"#fff",corVazio:"rgba(255,255,255,.15)",nivel:1,desc:"Conhece o tema superficialmente, usa raramente ou nunca usou no contexto profissional. Ainda não incorporou IA à rotina de trabalho."},
+  {id:"amarela",nome:"Faixa Amarela — Explorador",cls:"fp-amarela",bar:"#FFE900",cor:"#FFE900",corVazio:"rgba(255,233,0,.15)",nivel:2,desc:"Usa IA com alguma regularidade para tarefas simples. Já testou ferramentas e tem curiosidade, mas ainda não integrou ao fluxo de trabalho de forma consistente."},
+  {id:"verde",nome:"Faixa Verde — Praticante",cls:"fp-verde",bar:"#44D62C",cor:"#44D62C",corVazio:"rgba(68,214,44,.15)",nivel:3,desc:"Usa IA com frequência e já obtém ganhos reais de produtividade. Combina uso conversacional com analítico e começa a integrar ferramentas ao fluxo de trabalho."},
+  {id:"rosa",nome:"Faixa Rosa — Multiplicador",cls:"fp-rosa",bar:"#FF1969",cor:"#FF1969",corVazio:"rgba(255,25,105,.15)",nivel:4,desc:"IA está no centro do trabalho. Cria prompts estruturados, usa automações, integra ferramentas e replica o conhecimento para o time. É referência interna no tema."},
+  {id:"preta",nome:"Faixa Preta — Arquiteto",cls:"fp-preta",bar:"#000000",cor:"#fff",corVazio:"rgba(255,255,255,.15)",nivel:5,desc:"Constrói soluções com IA — agentes, workflows, integrações via API. Lidera iniciativas, define estratégia e habilita outras pessoas. É um ativo estratégico da empresa."}
 ];
 
 function login() {
@@ -241,43 +247,47 @@ function contarDores(dados) {
 }
 
 function renderPainel(dados) {
-  if(!dados || dados.length === 0) {
-    document.getElementById("conteudo").innerHTML = `
-      <div class="error-msg">Nenhuma resposta encontrada ainda. Aguarde os diretores responderem o questionário.</div>`;
-    return;
-  }
+  const total = dados ? dados.length : 0;
+  const notaMedia = total > 0 ? calcNotaMedia(dados) : null;
+  const empresa = total > 0 ? getEmpresaDiag(notaMedia) : null;
+  const doresTop = total > 0 ? contarDores(dados) : [];
 
-  const total = dados.length;
-  const notaMedia = calcNotaMedia(dados);
-  const empresa = getEmpresaDiag(notaMedia);
-  const doresTop = contarDores(dados);
-
-  // contar faixas
   const faixaCount = {branca:0,amarela:0,verde:0,rosa:0,preta:0};
-  dados.forEach(d=>{ const f = getFaixaId(d.faixa_calculada); faixaCount[f]++; });
+  if(total > 0) dados.forEach(d=>{ const f = getFaixaId(d.faixa_calculada); faixaCount[f]++; });
 
-  // SUMMARY
-  const freqAlta = dados.filter(d=>["Quase todo dia","Todo dia"].includes(d.frequencia)).length;
+  const freqAlta = total > 0 ? dados.filter(d=>["Quase todo dia","Todo dia"].includes(d.frequencia)).length : 0;
   const mediaFomentoStr = notaMedia !== null ? notaMedia+"/10" : "—";
+  const faltando = 7 - total;
 
   let html = `
   <div class="summary-grid">
     <div class="sum-card"><div class="sum-num">${total}</div><div class="sum-lbl">Respostas recebidas</div></div>
-    <div class="sum-card"><div class="sum-num">${7-total}</div><div class="sum-lbl">Aguardando resposta</div></div>
+    <div class="sum-card" style="${faltando>0?'border:1px solid rgba(255,233,0,.3)':''}"><div class="sum-num" style="${faltando>0?'color:#FFE900':''}">${faltando}</div><div class="sum-lbl">Aguardando resposta</div></div>
     <div class="sum-card"><div class="sum-num">${mediaFomentoStr}</div><div class="sum-lbl">Nota média da empresa</div></div>
     <div class="sum-card"><div class="sum-num">${freqAlta}</div><div class="sum-lbl">Usam IA todo dia ou quase</div></div>
   </div>`;
 
+  if(total === 0) {
+    html += `<div style="background:#0847A8;border:1px solid rgba(255,255,255,.15);border-left:4px solid #FFE900;border-radius:0 10px 10px 0;padding:1rem 1.25rem;margin-bottom:1.5rem">
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#FFE900;margin-bottom:.3rem">Aguardando respostas</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.6">Nenhum diretor respondeu ainda. O painel será atualizado automaticamente conforme as respostas chegarem. Clique em <strong style="color:#fff">"Atualizar respostas"</strong> para verificar.</div>
+    </div>`;
+  }
+
   // EMPRESA DIAGNOSTICO
+  html += `<div class="section-title">Diagnóstico da empresa como fomentadora de IA</div>`;
   if(empresa) {
     html += `
-    <div class="section-title">Diagnóstico da empresa como fomentadora de IA</div>
     <div class="empresa-box ${empresa.cls}">
       <div class="eb-tag">OOH Brasil · Estágio atual</div>
       <div class="eb-title">${empresa.estagio}</div>
       <div class="eb-nota">${empresa.nota} · com base nas respostas dos diretores</div>
       <div class="eb-desc">${empresa.desc}</div>
       <div class="eb-alerta">${empresa.alerta}</div>
+    </div>`;
+  } else {
+    html += `<div style="background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.2);border-radius:12px;padding:1.5rem;text-align:center;margin-bottom:1.5rem">
+      <div style="font-size:13px;color:rgba(255,255,255,.4);font-weight:600">O diagnóstico aparecerá aqui após os diretores responderem</div>
     </div>`;
   }
 
@@ -288,7 +298,12 @@ function renderPainel(dados) {
     const pct = total > 0 ? Math.round((count/total)*100) : 0;
     html += `
     <div class="faixa-bar-row">
-      <div class="faixa-bar-label">${f.nome.split("—")[1]?.trim()||f.nome}</div>
+      <div class="tooltip-wrap">
+        <div class="faixa-bar-label">${f.nome.split("—")[1]?.trim()||f.nome}</div>
+        <div class="tooltip-icon">?
+          <div class="tooltip-box"><strong style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#FFE900;margin-bottom:.3rem">${f.nome}</strong>${f.desc}</div>
+        </div>
+      </div>
       <div class="faixa-bar-track">
         <div class="faixa-bar-fill" style="width:${pct}%;background:${f.bar}">${count > 0 ? count+(count===1?' diretor':' diretores') : ''}</div>
       </div>
@@ -298,30 +313,33 @@ function renderPainel(dados) {
   html += `</div>`;
 
   // TABELA INDIVIDUAL
-  html += `
-  <div class="section-title">Perfil individual por área</div>
-  <div class="table-wrap">
-  <table>
+  html += `<div class="section-title">Perfil individual por área</div>`;
+  if(total > 0) {
+    html += `<div class="table-wrap"><table>
     <thead><tr>
       <th>Área</th><th>Faixa</th><th>Frequência</th><th>Nota empresa</th><th>Top dores</th><th>Principais barreiras</th>
     </tr></thead>
     <tbody>`;
-
-  dados.forEach(d=>{
-    const fCls = getFaixaClass(d.faixa_calculada);
-    const fNome = d.faixa_calculada ? d.faixa_calculada.split("—")[1]?.trim()||d.faixa_calculada : "—";
-    const dores = d.dores_ranking ? d.dores_ranking.split("|").slice(0,2).map(x=>x.replace(/^\d+\.\s*/,"").trim()).join(", ") : "—";
-    const barr = d.barreiras ? d.barreiras.split(",").slice(0,2).map(x=>x.trim()).join(", ") : "—";
-    html += `<tr>
-      <td>${d.departamento||"—"}</td>
-      <td><span class="faixa-pill ${fCls}">${fNome}</span></td>
-      <td>${d.frequencia||"—"}</td>
-      <td style="text-align:center;font-weight:700;color:#FFE900">${d.nota_empresa||"—"}</td>
-      <td style="font-size:11px">${dores}</td>
-      <td style="font-size:11px">${barr}</td>
-    </tr>`;
-  });
-  html += `</tbody></table></div>`;
+    dados.forEach(d=>{
+      const fCls = getFaixaClass(d.faixa_calculada);
+      const fNome = d.faixa_calculada ? d.faixa_calculada.split("—")[1]?.trim()||d.faixa_calculada : "—";
+      const dores = d.dores_ranking ? d.dores_ranking.split("|").slice(0,2).map(x=>x.replace(/^\d+\.\s*/,"").trim()).join(", ") : "—";
+      const barr = d.barreiras ? d.barreiras.split(",").slice(0,2).map(x=>x.trim()).join(", ") : "—";
+      html += `<tr>
+        <td>${d.departamento||"—"}</td>
+        <td><span class="faixa-pill ${fCls}">${fNome}</span></td>
+        <td>${d.frequencia||"—"}</td>
+        <td style="text-align:center;font-weight:700;color:#FFE900">${d.nota_empresa||"—"}</td>
+        <td style="font-size:11px">${dores}</td>
+        <td style="font-size:11px">${barr}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  } else {
+    html += `<div style="background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.2);border-radius:12px;padding:1.5rem;text-align:center;margin-bottom:1.5rem">
+      <div style="font-size:13px;color:rgba(255,255,255,.4);font-weight:600">Os perfis individuais aparecerão aqui conforme as respostas chegarem</div>
+    </div>`;
+  }
 
   // DORES MAIS CITADAS
   if(doresTop.length > 0) {
@@ -339,7 +357,7 @@ function renderPainel(dados) {
   }
 
   // VISOES LIVRES
-  const visoes = dados.filter(d=>d.visao_livre && d.visao_livre.trim().length > 5);
+  const visoes = total > 0 ? dados.filter(d=>d.visao_livre && d.visao_livre.trim().length > 5) : [];
   if(visoes.length > 0) {
     html += `<div class="section-title">Visão livre — o que cada área quer resolver com IA</div>`;
     visoes.forEach(d=>{
@@ -359,7 +377,7 @@ async function carregarDados() {
     const res = await fetch(SHEET_URL + "?limit=50");
     if(!res.ok) throw new Error("HTTP " + res.status);
     const dados = await res.json();
-    const limpos = dados.filter(d=>d.timestamp && d.timestamp.length > 0);
+    const limpos = Array.isArray(dados) ? dados.filter(d=>d.timestamp && d.timestamp.length > 0) : [];
     renderPainel(limpos);
   } catch(e) {
     document.getElementById("conteudo").innerHTML = `
