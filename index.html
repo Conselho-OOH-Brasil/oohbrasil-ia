@@ -258,7 +258,8 @@ function validar(){
   if(s===4)return Object.values(st.profund).flat().length>0;
   if(s===5)return st.ranking.length>0;
   if(s===6)return st.barreiras.length>0;
-  if(s===7)return Object.keys(st.cultura).length===4;
+  if(s===7)return Object.keys(st.cultura).length===4&&st.ofertas.length>0;
+  if(s===8)return st.comentario.trim().length>10;
   return true;
 }
 
@@ -270,7 +271,8 @@ function erroMsg(){
   if(s===4)return"Selecione pelo menos uma atividade que você já realizou com IA.";
   if(s===5)return"Adicione pelo menos uma dor ao seu ranking.";
   if(s===6)return"Selecione pelo menos uma barreira.";
-  if(s===7)return"Responda todas as 4 perguntas sobre o suporte da empresa.";
+  if(s===7)return Object.keys(st.cultura).length<4?"Responda todas as 4 perguntas sobre o suporte da empresa.":"Selecione pelo menos uma opção do que você precisaria para avançar.";
+  if(s===8)return"Descreva pelo menos uma coisa que gostaria de resolver com IA antes de finalizar.";
   return"";
 }
 
@@ -426,7 +428,7 @@ function s8(){
   </div>
   <div class="nav">
     <button class="bbtn" onclick="goStep(7)">← Voltar</button>
-    <button class="nbtn" onclick="doFinalizar()">Finalizar e ver resultado →</button>
+    <button class="nbtn" onclick="st.comentario=document.getElementById('ta')?.value||'';if(!validar()){const el=document.createElement('div');el.id='val-err';el.className='err-msg';el.textContent=erroMsg();document.querySelector('.nav').before(el);el.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>{if(el.parentNode)el.remove();},4000);}else{doFinalizar();}">Finalizar e ver resultado →</button>
   </div>`;
 }
 
