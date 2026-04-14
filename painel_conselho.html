@@ -96,10 +96,10 @@ tbody td:first-child{font-weight:700;color:#fff}
 .cultura-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem;margin-bottom:1rem}
 .cultura-item{background:#0847A8;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.85rem 1rem}
 .cultura-nome{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#FFE900;margin-bottom:.5rem}
-.cultura-barras{display:flex;gap:.3rem;align-items:flex-end;height:32px}
-.cultura-barra-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
-.cultura-barra{width:100%;border-radius:3px;transition:height .3s}
-.cultura-barra-label{font-size:9px;color:rgba(255,255,255,.5);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px}
+.cultura-barras{display:flex;gap:.4rem;align-items:flex-end;height:60px;margin-bottom:.5rem}
+.cultura-barra-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.cultura-barra{width:100%;border-radius:4px;min-height:4px;transition:height .3s}
+.cultura-barra-label{font-size:9px;color:rgba(255,255,255,.5);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px;text-align:center}
 
 /* DORES */
 .dores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.6rem;margin-bottom:1rem}
@@ -314,15 +314,15 @@ function renderPainel(dados){
         <div class="cultura-nome">${label}</div>
         <div class="cultura-barras">
           <div class="cultura-barra-wrap">
-            <div class="cultura-barra" style="height:${Math.round((counts.sim/max)*28)}px;background:rgba(255,255,255,.7)"></div>
+            <div class="cultura-barra" style="height:${Math.max(4,Math.round((counts.sim/max)*60))}px;background:rgba(255,255,255,.75)"></div>
             <div class="cultura-barra-label">Sim (${counts.sim})</div>
           </div>
           <div class="cultura-barra-wrap">
-            <div class="cultura-barra" style="height:${Math.round((counts.parcialmente/max)*28)}px;background:rgba(255,255,255,.35)"></div>
+            <div class="cultura-barra" style="height:${Math.max(4,Math.round((counts.parcialmente/max)*60))}px;background:rgba(255,255,255,.4)"></div>
             <div class="cultura-barra-label">Parcial (${counts.parcialmente})</div>
           </div>
           <div class="cultura-barra-wrap">
-            <div class="cultura-barra" style="height:${Math.round((counts.nao/max)*28)}px;background:rgba(255,255,255,.15)"></div>
+            <div class="cultura-barra" style="height:${Math.max(4,Math.round((counts.nao/max)*60))}px;background:rgba(255,255,255,.18)"></div>
             <div class="cultura-barra-label">Não (${counts.nao})</div>
           </div>
         </div>
