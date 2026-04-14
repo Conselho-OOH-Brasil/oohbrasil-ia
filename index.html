@@ -534,9 +534,15 @@ async function finalizar() {
   const ta = document.getElementById("ta");
   if(ta) st.comentario = ta.value;
 
-  go(9); // mostra resultado
+  // Vai para resultado PRIMEIRO
+  st.step = 9;
+  document.getElementById("prog-fill").style.width = "100%";
+  document.getElementById("prog-etapa").textContent = "Etapa 8 de 8";
+  document.getElementById("prog-falta").textContent = "Concluído";
+  const fns = [null,s1,s2,s3,s4,s5,s6,s7,s8,sRes];
+  document.getElementById("app").innerHTML = sRes();
 
-  // monta payload
+  // Agora monta e envia o payload
   const faixa = calcFaixa();
   const profItems = Object.entries(st.profund).map(([nid, items])=>{
     const nivel = PROFUNDIDADE.find(n=>n.id===nid);
