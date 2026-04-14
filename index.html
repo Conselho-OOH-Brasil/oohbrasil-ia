@@ -257,6 +257,43 @@ function calcFaixa() {
 function pct() { return Math.round((Math.min(st.step, TOTAL) / TOTAL) * 100); }
 function faltam() { const r = TOTAL - Math.min(st.step, TOTAL); return r <= 0 ? "Concluído" : r + (r===1?" etapa restante":" etapas restantes"); }
 
+function validar(step) {
+  if(step===1) return st.dept !== "";
+  if(step===2) return st.nivel !== "" && st.freq !== "";
+  if(step===3) return Object.values(st.profund).flat().length > 0;
+  if(step===4) return st.ranking.length > 0;
+  if(step===5) return st.barreiras.length > 0;
+  if(step===6) return st.fomento !== "";
+  return true;
+}
+
+function erroMsg(step) {
+  if(step===1) return "Selecione sua área para continuar.";
+  if(step===2) return "Responda pelo menos o nível de uso e a frequência para continuar.";
+  if(step===3) return "Selecione pelo menos uma atividade que você já realizou com IA.";
+  if(step===4) return "Adicione pelo menos uma dor ao seu ranking para continuar.";
+  if(step===5) return "Selecione pelo menos uma barreira para continuar.";
+  if(step===6) return "Dê uma nota para o suporte da empresa antes de continuar.";
+  return "";
+}
+
+function mostrarErro(msg) {
+  const existing = document.getElementById("validation-err");
+  if(existing) existing.remove();
+  const el = document.createElement("div");
+  el.id = "validation-err";
+  el.style.cssText = "background:rgba(255,25,105,.15);border:1.5px solid #FF1969;border-radius:8px;padding:10px 14px;font-size:12px;font-weight:700;color:#FF1969;margin-top:1rem;text-align:center;text-transform:uppercase;letter-spacing:.04em";
+  el.textContent = msg;
+  document.querySelector(".nav").before(el);
+  el.scrollIntoView({behavior:"smooth", block:"center"});
+  setTimeout(()=>el.remove(), 4000);
+}
+
+function avancar(nextStep) {
+  if(!validar(st.step)) { mostrarErro(erroMsg(st.step)); return; }
+  go(nextStep || st.step+1);
+}
+
 function go(n) {
   st.step = n;
   document.getElementById("prog-fill").style.width = pct() + "%";
@@ -275,7 +312,7 @@ function nav(back, nextLabel, nextStep) {
   const stepsLabel = remaining > 0 ? `<span class="nbtn-steps">${remaining} ${remaining===1?'etapa':'etapas'}</span>` : "";
   return `<div class="nav">
     ${back ? `<button class="bbtn" onclick="go(${st.step-1})">← Voltar</button>` : `<div></div>`}
-    <button class="nbtn" onclick="go(${nextStep||st.step+1})">${nextLabel||"Continuar"} ${stepsLabel}</button>
+    <button class="nbtn" onclick="avancar(${nextStep||st.step+1})">${nextLabel||"Continuar"} ${stepsLabel}</button>
   </div>`;
 }
 
@@ -467,17 +504,17 @@ async function finalizar() {
   const payload = {
     data: {
       timestamp: new Date().toISOString(),
-      area: st.dept,
-      nivel_uso: st.nivel,
-      ferramentas: st.tools.join(", "),
-      frequencia: st.freq,
-      profundidade: profItems,
-      dores_ranking: st.ranking.map((d,i)=>`${i+1}. ${d.t}`).join(" | "),
-      barreiras: st.barreiras.join(", "),
-      nota_empresa: st.fomento,
-      o_que_precisaria: st.ofertas.join(", "),
-      visao_livre: st.comentario,
-      faixa_calculada: faixa.nome
+      area: st.dept || "Não informado",
+      nivel_uso: st.nivel || "0",
+      ferramentas: st.tools.join(", ") || "Nenhuma",
+      frequencia: st.freq || "Não informado",
+      profundidade: profItems || "Não informado",
+      dores_ranking: st.ranking.map((d,i)=>`${i+1}. ${d.t}`).join(" | ") || "Nenhuma",
+      barreiras: st.barreiras.join(", ") || "Nenhuma",
+      nota_empresa: st.fomento || "0",
+      o_que_precisaria: st.ofertas.join(", ") || "Nenhum",
+      visao_livre: st.comentario || "",
+      faixa_calculada: faixa.nome || "Faixa Branca — Observador"
     }
   };
 
