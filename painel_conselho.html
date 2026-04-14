@@ -192,39 +192,40 @@ function getFaixaId(nome) {
 }
 
 function calcNotaMedia(dados) {
-  const notas = dados.map(d=>parseInt(d.nota_empresa)).filter(n=>!isNaN(n));
-  if(!notas.length) return null;
-  return Math.round((notas.reduce((a,b)=>a+b,0)/notas.length)*10)/10;
+  const scores = dados.map(d=>parseInt(d.score_cultura)).filter(n=>!isNaN(n));
+  if(!scores.length) return null;
+  const media = scores.reduce((a,b)=>a+b,0)/scores.length;
+  return Math.round(media*10)/10;
 }
 
 function getEmpresaDiag(media) {
   if(media === null) return null;
-  if(media <= 3) return {
+  if(media <= 2) return {
     cls:"eb-ausente",
     estagio:"Estágio 1 — Ausente",
-    nota:`Nota média: ${media}/10`,
-    desc:"A empresa ainda não criou nenhuma condição estrutural para o uso de IA. Não há ferramentas, política, treinamento ou direcionamento claro. O uso que existe é iniciativa individual e isolada — e tende a ser inconsistente.",
+    nota:`Score médio de cultura: ${media}/8`,
+    desc:"A empresa ainda não criou nenhuma condição estrutural para o uso de IA. Não há ferramentas licenciadas, política definida, treinamento formal nem incentivo ativo da liderança.",
     alerta:"Enquanto a concorrência acelera, cada mês sem estrutura é vantagem competitiva perdida. A janela de oportunidade está se fechando."
   };
-  if(media <= 5) return {
+  if(media <= 4) return {
     cls:"eb-incipiente",
     estagio:"Estágio 2 — Incipiente",
-    nota:`Nota média: ${media}/10`,
-    desc:"Existe alguma consciência do tema, mas sem estrutura real. A empresa fala de IA mas não financia, não treina e não define política. O resultado é entusiasmo pontual sem transformação real.",
-    alerta:"O time quer avançar mas não tem suporte — o gap entre intenção e realidade cria frustração e estagnação. Vale lembrar: o curso de Formação em IA do G4 Educação foi contratado em novembro de 2024 e ainda não foi concluído pelos diretores."
+    nota:`Score médio de cultura: ${media}/8`,
+    desc:"Existe alguma consciência do tema, mas sem estrutura real. Algumas condições começam a aparecer de forma isolada, mas sem consistência — falta política, treinamento ou incentivo ativo.",
+    alerta:"O time quer avançar mas não tem suporte estruturado — o gap entre intenção e prática cria frustração e estagnação."
   };
-  if(media <= 7) return {
+  if(media <= 6) return {
     cls:"eb-construcao",
     estagio:"Estágio 3 — Em construção",
-    nota:`Nota média: ${media}/10`,
-    desc:"A empresa reconhece a importância e começa a criar condições. Há iniciativas, mas ainda faltam política clara, ferramentas consolidadas e uma cultura de experimentação estabelecida.",
-    alerta:"O momento é agora — consolidar a estrutura antes que o gap entre áreas se torne um problema de alinhamento estratégico."
+    nota:`Score médio de cultura: ${media}/8`,
+    desc:"A empresa reconhece a importância e começa a criar condições reais. Há ferramentas, alguma política ou treinamento — mas ainda falta consistência e incentivo ativo em todas as frentes.",
+    alerta:"O momento é agora — consolidar o que falta antes que o gap entre áreas vire um problema de alinhamento estratégico."
   };
   return {
     cls:"eb-aceleradora",
     estagio:"Estágio 4 — Aceleradora",
-    nota:`Nota média: ${media}/10`,
-    desc:"A empresa é protagonista da transformação — oferece ferramentas, política, treinamento e incentivo real. A IA está na agenda estratégica e o time tem condições de avançar de forma consistente.",
+    nota:`Score médio de cultura: ${media}/8`,
+    desc:"A empresa é protagonista da transformação — oferece ferramentas licenciadas, política clara, treinamento formal e incentivo ativo da liderança. O time tem condições de avançar de forma consistente.",
     alerta:"Próximo passo: sustentar a velocidade, medir resultados e escalar as iniciativas que estão funcionando."
   };
 }
@@ -265,7 +266,7 @@ function renderPainel(dados) {
   <div class="summary-grid">
     <div class="sum-card"><div class="sum-num">${total}/7</div><div class="sum-lbl">Respostas recebidas</div></div>
     <div class="sum-card" style="${faltando>0?'border:1px solid rgba(255,233,0,.3)':''}"><div class="sum-num" style="${faltando>0?'color:#FFE900':''}">${faltando}</div><div class="sum-lbl">Aguardando resposta</div></div>
-    <div class="sum-card"><div class="sum-num">${mediaFomentoStr}</div><div class="sum-lbl">Nota média da empresa</div></div>
+    <div class="sum-card"><div class="sum-num">${mediaFomentoStr}</div><div class="sum-lbl">Score médio de cultura (0–8)</div></div>
     <div class="sum-card"><div class="sum-num">${freqAlta}</div><div class="sum-lbl">Usam IA todo dia ou quase</div></div>
   </div>
 

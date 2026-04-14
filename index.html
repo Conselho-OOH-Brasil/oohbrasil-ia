@@ -198,7 +198,7 @@ const SHEET_URL = "https://sheetdb.io/api/v1/zcwbo5ibo6n6e";
 </div>
 
 <script>
-const TOTAL = 7;
+const TOTAL = 8;
 const DEPTS = ["CEO","Comercial","Financeiro","Operações","Expansão","RH","Marketing"];
 
 const PROFUNDIDADE = [
@@ -240,7 +240,7 @@ const FAIXAS = [
   {id:"preta",cls:"fb-preta",nivel:5,cor:"#fff",corVazio:"rgba(255,255,255,.15)",nome:"Faixa Preta — Arquiteto",sub:"Construção e liderança em IA",desc:"Você constrói soluções com IA — agentes, workflows, integrações via API. Lidera iniciativas, define estratégia e habilita outras pessoas. É um ativo estratégico da OOH Brasil nesse tema.",next:"Você já chegou no nível mais alto. O próximo passo é escalar: estruture iniciativas formais, documente o que funciona e seja a referência que puxa as demais áreas para frente."}
 ];
 
-const st = {step:1,nome:"",dept:"",nivel:"",tools:[],freq:"",profund:{},ranking:[],barreiras:[],fomento:"",ofertas:[],comentario:""};
+const st = {step:1,nome:"",dept:"",autoaval:"",nivel:"",tools:[],freq:"",profund:{},ranking:[],barreiras:[],cultura:{},ofertas:[],comentario:""};
 
 function calcFaixa() {
   const nivelNum = parseInt(st.nivel)||0;
@@ -262,21 +262,23 @@ function faltam() { const r = TOTAL - Math.min(st.step, TOTAL); return r <= 0 ? 
 
 function validar(step) {
   if(step===1) return st.nome.trim().length > 1 && st.dept !== "";
-  if(step===2) return st.nivel !== "" && st.freq !== "";
-  if(step===3) return Object.values(st.profund).flat().length > 0;
-  if(step===4) return st.ranking.length > 0;
-  if(step===5) return st.barreiras.length > 0;
-  if(step===6) return st.fomento !== "";
+  if(step===2) return st.autoaval !== "";
+  if(step===3) return st.nivel !== "" && st.freq !== "";
+  if(step===4) return Object.values(st.profund).flat().length > 0;
+  if(step===5) return st.ranking.length > 0;
+  if(step===6) return st.barreiras.length > 0;
+  if(step===7) return Object.keys(st.cultura).length === 4;
   return true;
 }
 
 function erroMsg(step) {
   if(step===1) return st.nome.trim().length <= 1 ? "Informe seu nome para continuar." : "Selecione sua área para continuar.";
-  if(step===2) return "Responda pelo menos o nível de uso e a frequência para continuar.";
-  if(step===3) return "Selecione pelo menos uma atividade que você já realizou com IA.";
-  if(step===4) return "Adicione pelo menos uma dor ao seu ranking para continuar.";
-  if(step===5) return "Selecione pelo menos uma barreira para continuar.";
-  if(step===6) return "Dê uma nota para o suporte da empresa antes de continuar.";
+  if(step===2) return "Selecione como você avalia sua maturidade atual em IA.";
+  if(step===3) return "Responda pelo menos o nível de uso e a frequência para continuar.";
+  if(step===4) return "Selecione pelo menos uma atividade que você já realizou com IA.";
+  if(step===5) return "Adicione pelo menos uma dor ao seu ranking para continuar.";
+  if(step===6) return "Selecione pelo menos uma barreira para continuar.";
+  if(step===7) return "Responda todas as 4 perguntas sobre o suporte da empresa.";
   return "";
 }
 
@@ -320,9 +322,9 @@ function nav(back, nextLabel, nextStep) {
 }
 
 function render() {
-  const fns = [null,s1,s2,s3,s4,s5,s6,s7,sRes];
-  document.getElementById("app").innerHTML = fns[Math.min(st.step,8)]();
-  if(st.step===4) bindDrag();
+  const fns = [null,s1,s2,s3,s4,s5,s6,s7,s8,sRes];
+  document.getElementById("app").innerHTML = fns[Math.min(st.step,9)]();
+  if(st.step===5) bindDrag();
 }
 
 /* ---- STEPS ---- */
@@ -343,6 +345,23 @@ function s1() {
 }
 
 function s2() {
+  const opts = [
+    {v:"1",l:"Estou no início — sei pouco e uso pouco ou nada"},
+    {v:"2",l:"Explorador — uso pontualmente, ainda aprendendo"},
+    {v:"3",l:"Praticante — uso regularmente e já tenho ganhos reais"},
+    {v:"4",l:"Avançado — IA integrada ao meu trabalho, começo a escalar"},
+    {v:"5",l:"Referência — construo soluções e lidero iniciativas de IA"}
+  ];
+  return `<div class="sec-tag">Autoavaliação</div>
+  <div class="sec-title">Como você se posiciona em IA hoje?</div>
+  <div class="sec-desc">Antes de qualquer pergunta técnica, queremos saber como <em>você mesmo</em> avalia seu momento atual. Seja honesto — não há resposta certa ou errada.</div>
+  <div class="pills" style="flex-direction:column;gap:.6rem">
+    ${opts.map(o=>`<button class="pill${st.autoaval===o.v?' sel':''}" onclick="st.autoaval='${o.v}';render()" style="text-align:left;border-radius:10px;padding:12px 16px;font-size:13px">${o.l}</button>`).join("")}
+  </div>
+  ${nav(true,"Continuar",3)}`;
+}
+
+function s3() {
   return `<div class="sec-tag">Bloco 1 — Maturidade atual</div>
   <div class="sec-title">Como você usa IA hoje?</div>
   <div class="sec-desc">Queremos entender o ponto de partida real — sem julgamentos sobre o nível de uso.</div>
@@ -358,10 +377,8 @@ function s2() {
     <div class="qlabel">Frequência de uso</div>
     <div class="pills">${FREQ.map(f=>`<button class="pill${st.freq===f?' sel':''}" onclick="st.freq='${f}';render()">${f}</button>`).join("")}</div>
   </div>
-  ${nav(true,"Continuar",3)}`;
+  ${nav(true,"Continuar",4)}`;
 }
-
-function s3() {
   return `<div class="sec-tag">Bloco 2 — Profundidade de uso</div>
   <div class="sec-title">Como você usa IA, na prática?</div>
   <div class="sec-desc">Marque tudo que você já fez ao menos uma vez — independente da frequência. Isso nos mostra não só <em>quanto</em>, mas <em>como</em> cada área usa IA.</div>
@@ -369,6 +386,8 @@ function s3() {
     ${PROFUNDIDADE.map(n=>{
       const sels = st.profund[n.id]||[];
       const hasSel = sels.length > 0;
+      const visivel = (n.id==="n4" && parseInt(st.nivel||"0") < 2) ? false : true;
+      if(!visivel) return "";
       return `<div class="nivel-card${hasSel?' has-sel':''}">
         <div class="nivel-header">
           <div class="nivel-num">${n.num}</div>
@@ -380,10 +399,10 @@ function s3() {
       </div>`;
     }).join("")}
   </div>
-  ${nav(true,"Continuar",4)}`;
+  ${nav(true,"Continuar",5)}`;
 }
 
-function s4() {
+function s5() {
   const inRank = st.ranking.map(r=>r.id);
   const avail = DORES.filter(d=>!inRank.includes(d.id));
   const poolHtml = avail.length > 0
@@ -398,36 +417,44 @@ function s4() {
   ${poolHtml}
   <div class="rank-label">Seu ranking de prioridades</div>
   <div class="rank-zone" id="rank-zone">${rankHtml}</div>
-  ${nav(true,"Continuar",5)}`;
+  ${nav(true,"Continuar",6)}`;
 }
 
-function s5() {
+function s6() {
   const barr = getBarrByFaixa();
   return `<div class="sec-tag">Bloco 4 — Barreiras</div>
   <div class="sec-title">${barr.titulo}</div>
   <div class="sec-desc">${barr.desc}</div>
   <div class="dor-pool">${barr.itens.map(b=>`<div class="dor-item${st.barreiras.includes(b)?' barr-sel':''}" onclick="tog(st.barreiras,'${b.replace(/'/g,"\\'")}');render()"><div class="dor-item-t">${b}</div></div>`).join("")}</div>
-  ${nav(true,"Continuar",6)}`;
-}
-
-function s6() {
-  return `<div class="sec-tag">Bloco 5 — Cultura e suporte</div>
-  <div class="sec-title">Como você avalia o ambiente para IA?</div>
-  <div class="sec-desc">Queremos o sentimento honesto sobre o quanto a empresa hoje cria condições reais para avançar nesse tema.</div>
-  <div class="qblock">
-    <div class="qlabel">O quanto a empresa estimula e habilita o uso de IA nas áreas?</div>
-    <div class="qhint">0 = Nenhum suporte &nbsp;|&nbsp; 10 = Totalmente estruturado e fomentado</div>
-    <div class="scale-wrap">${[0,1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="sbtn${st.fomento===String(n)?' sel':''}" onclick="st.fomento='${n}';render()">${n}</button>`).join("")}</div>
-    <div class="scale-lbl"><span>Nenhum suporte</span><span>Totalmente estruturado</span></div>
-  </div>
-  <div class="qblock">
-    <div class="qlabel">O que você mais precisaria para avançar?</div>
-    <div class="pills">${OFERTAS.map(o=>`<button class="pill${st.ofertas.includes(o)?' sel':''}" onclick="tog(st.ofertas,'${o}');render()">${o}</button>`).join("")}</div>
-  </div>
   ${nav(true,"Continuar",7)}`;
 }
 
 function s7() {
+  const pergs = [
+    {k:"ferramentas", q:"A empresa disponibiliza ferramentas de IA licenciadas para o time?"},
+    {k:"politica",    q:"Existe uma política clara sobre o que pode ou não ser usado?"},
+    {k:"treinamento", q:"Você ou seu time recebeu treinamento formal em IA?"},
+    {k:"lideranca",   q:"A liderança sênior incentiva ativamente o uso de IA no dia a dia?"}
+  ];
+  const opts = [{v:"sim",l:"Sim"},{v:"parcialmente",l:"Parcialmente"},{v:"nao",l:"Não"}];
+  return `<div class="sec-tag">Bloco 5 — Cultura e suporte</div>
+  <div class="sec-title">Como a empresa apoia o uso de IA?</div>
+  <div class="sec-desc">Queremos entender de forma objetiva o suporte real que existe hoje — não a intenção, mas a prática.</div>
+  ${pergs.map(p=>`
+    <div class="qblock">
+      <div class="qlabel">${p.q}</div>
+      <div class="pills">
+        ${opts.map(o=>`<button class="pill${st.cultura[p.k]===o.v?' sel':''}" onclick="st.cultura['${p.k}']='${o.v}';render()">${o.l}</button>`).join("")}
+      </div>
+    </div>`).join("")}
+  <div class="qblock">
+    <div class="qlabel">O que você mais precisaria para avançar?</div>
+    <div class="pills">${OFERTAS.map(o=>`<button class="pill${st.ofertas.includes(o)?' sel':''}" onclick="tog(st.ofertas,'${o}');render()">${o}</button>`).join("")}</div>
+  </div>
+  ${nav(true,"Continuar",8)}`;
+}
+
+function s8() {
   return `<div class="sec-tag">Bloco 6 — Visão livre</div>
   <div class="sec-title">Se pudesse resolver uma coisa com IA amanhã, o que seria?</div>
   <div class="sec-desc">Descreva livremente — pode ser uma tarefa específica, um processo ou um problema recorrente. Quanto mais concreto, melhor.</div>
@@ -435,7 +462,7 @@ function s7() {
     <textarea id="ta" placeholder="Ex: Gostaria de ter um resumo automático das métricas da área toda segunda de manhã, antes da reunião de liderança...">${st.comentario}</textarea>
   </div>
   <div class="nav">
-    <button class="bbtn" onclick="go(6)">← Voltar</button>
+    <button class="bbtn" onclick="go(7)">← Voltar</button>
     <button class="nbtn" onclick="finalizar()">Finalizar e ver resultado →</button>
   </div>`;
 }
@@ -468,6 +495,7 @@ function sRes() {
   <div class="res-box">
     ${row("Nome", st.nome||"—")}
     ${row("Área", st.dept||"—")}
+    ${row("Autoavaliação", ["—","Início","Explorador","Praticante","Avançado","Referência"][parseInt(st.autoaval)||0]||"—")}
     ${row("Nível de uso", nlbl)}
     ${row("Frequência", st.freq||"—")}
     <div class="res-row"><span>Ferramentas</span><div class="res-v">${st.tools.length?chipsHtml(st.tools):"—"}</div></div>
@@ -513,18 +541,26 @@ async function finalizar() {
     return (nivel?nivel.name:"") + ": " + items.join(", ");
   }).join(" | ");
 
+  const culturaScore = Object.values(st.cultura).reduce((acc,v)=>acc+(v==="sim"?2:v==="parcialmente"?1:0),0);
+  const culturaTexto = Object.entries(st.cultura).map(([k,v])=>{
+    const labels={ferramentas:"Ferramentas licenciadas",politica:"Política clara",treinamento:"Treinamento formal",lideranca:"Incentivo da liderança"};
+    return `${labels[k]||k}: ${v}`;
+  }).join(" | ");
+
   const payload = {
     data: {
       timestamp: new Date().toISOString(),
       nome: st.nome || "Não informado",
       departamento: st.dept || "Não informado",
+      autoavaliacao: st.autoaval || "—",
       nivel_uso: st.nivel || "0",
       ferramentas: st.tools.join(", ") || "Nenhuma",
       frequencia: st.freq || "Não informado",
       profundidade: profItems || "Não informado",
       dores_ranking: st.ranking.map((d,i)=>`${i+1}. ${d.t}`).join(" | ") || "Nenhuma",
       barreiras: st.barreiras.join(", ") || "Nenhuma",
-      nota_empresa: st.fomento || "0",
+      cultura_empresa: culturaTexto || "Não respondido",
+      score_cultura: String(culturaScore),
       o_que_precisaria: st.ofertas.join(", ") || "Nenhum",
       visao_livre: st.comentario || "",
       faixa_calculada: faixa.nome || "Faixa Branca — Observador"
