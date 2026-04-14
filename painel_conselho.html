@@ -207,7 +207,23 @@ function getFaixaId(nome){
 function getFaixaCls(nome){return FAIXAS_DEF.find(f=>f.id===getFaixaId(nome))?.cls||"fp-branca";}
 
 function calcScoreMedia(dados){
-  const scores=dados.map(d=>parseInt(d.score_cultura)).filter(n=>!isNaN(n));
+  const scores=dados.map(d=>{
+    // Usa score_cultura se disponível, senão calcula do cultura_empresa
+    if(d.score_cultura && d.score_cultura.trim()!==""){
+      return parseInt(d.score_cultura);
+    }
+    // Calcula a partir do cultura_empresa
+    if(d.cultura_empresa){
+      let s=0;
+      d.cultura_empresa.split("|").forEach(part=>{
+        const v=part.split(":")[1]?.trim().toLowerCase();
+        if(v==="sim")s+=2;
+        else if(v==="parcialmente")s+=1;
+      });
+      return s;
+    }
+    return NaN;
+  }).filter(n=>!isNaN(n));
   if(!scores.length)return null;
   return Math.round((scores.reduce((a,b)=>a+b,0)/scores.length)*10)/10;
 }
@@ -298,15 +314,15 @@ function renderPainel(dados){
         <div class="cultura-nome">${label}</div>
         <div class="cultura-barras">
           <div class="cultura-barra-wrap">
-            <div class="cultura-barra" style="height:${Math.round((counts.sim/max)*28)}px;background:#44D62C"></div>
+            <div class="cultura-barra" style="height:${Math.round((counts.sim/max)*28)}px;background:rgba(255,255,255,.7)"></div>
             <div class="cultura-barra-label">Sim (${counts.sim})</div>
           </div>
           <div class="cultura-barra-wrap">
-            <div class="cultura-barra" style="height:${Math.round((counts.parcialmente/max)*28)}px;background:#FFE900"></div>
+            <div class="cultura-barra" style="height:${Math.round((counts.parcialmente/max)*28)}px;background:rgba(255,255,255,.35)"></div>
             <div class="cultura-barra-label">Parcial (${counts.parcialmente})</div>
           </div>
           <div class="cultura-barra-wrap">
-            <div class="cultura-barra" style="height:${Math.round((counts.nao/max)*28)}px;background:#FF1969"></div>
+            <div class="cultura-barra" style="height:${Math.round((counts.nao/max)*28)}px;background:rgba(255,255,255,.15)"></div>
             <div class="cultura-barra-label">Não (${counts.nao})</div>
           </div>
         </div>
@@ -341,6 +357,18 @@ function renderPainel(dados){
       <th>Nome</th><th>Área</th><th>Faixa calculada</th><th>Autoavaliação</th><th>Frequência</th><th>Score cultura</th><th>Top dores</th>
     </tr></thead><tbody>`;
     dados.forEach(d=>{
+      const scoreExibido=(()=>{
+        if(d.score_cultura&&d.score_cultura.trim()!=="")return d.score_cultura;
+        if(d.cultura_empresa){
+          let s=0;
+          d.cultura_empresa.split("|").forEach(part=>{
+            const v=part.split(":")[1]?.trim().toLowerCase();
+            if(v==="sim")s+=2;else if(v==="parcialmente")s+=1;
+          });
+          return String(s);
+        }
+        return"—";
+      })();
       const fCls=getFaixaCls(d.faixa_calculada);
       const fNome=d.faixa_calculada?d.faixa_calculada.split("—")[1]?.trim()||d.faixa_calculada:"—";
       const dores=d.dores_ranking?d.dores_ranking.split("|").slice(0,2).map(x=>x.replace(/^\d+\.\s*/,"").trim()).join(", "):"—";
@@ -361,7 +389,7 @@ function renderPainel(dados){
         <td><span class="fp ${fCls}">${fNome}</span></td>
         <td><span class="av-badge">${avLbl}</span> ${diffHtml}</td>
         <td>${d.frequencia||"—"}</td>
-        <td style="text-align:center;font-weight:700;color:#FFE900">${d.score_cultura||"—"}/8</td>
+        <td style="text-align:center;font-weight:700;color:#FFE900">${scoreExibido}/8</td>
         <td style="font-size:11px">${dores}</td>
       </tr>`;
     });
