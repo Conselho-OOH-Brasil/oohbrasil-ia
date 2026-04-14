@@ -247,6 +247,7 @@ function contarDores(dados) {
 }
 
 function renderPainel(dados) {
+  const DEPTS = ["CEO","Comercial","Financeiro","Operações","Expansão","RH","Marketing"];
   const total = dados ? dados.length : 0;
   const notaMedia = total > 0 ? calcNotaMedia(dados) : null;
   const empresa = total > 0 ? getEmpresaDiag(notaMedia) : null;
@@ -255,24 +256,32 @@ function renderPainel(dados) {
   const faixaCount = {branca:0,amarela:0,verde:0,rosa:0,preta:0};
   if(total > 0) dados.forEach(d=>{ const f = getFaixaId(d.faixa_calculada); faixaCount[f]++; });
 
+  const responderam = total > 0 ? dados.map(d=>(d.departamento||"").toLowerCase()) : [];
   const freqAlta = total > 0 ? dados.filter(d=>["Quase todo dia","Todo dia"].includes(d.frequencia)).length : 0;
   const mediaFomentoStr = notaMedia !== null ? notaMedia+"/10" : "—";
   const faltando = 7 - total;
 
   let html = `
   <div class="summary-grid">
-    <div class="sum-card"><div class="sum-num">${total}</div><div class="sum-lbl">Respostas recebidas</div></div>
+    <div class="sum-card"><div class="sum-num">${total}/7</div><div class="sum-lbl">Respostas recebidas</div></div>
     <div class="sum-card" style="${faltando>0?'border:1px solid rgba(255,233,0,.3)':''}"><div class="sum-num" style="${faltando>0?'color:#FFE900':''}">${faltando}</div><div class="sum-lbl">Aguardando resposta</div></div>
     <div class="sum-card"><div class="sum-num">${mediaFomentoStr}</div><div class="sum-lbl">Nota média da empresa</div></div>
     <div class="sum-card"><div class="sum-num">${freqAlta}</div><div class="sum-lbl">Usam IA todo dia ou quase</div></div>
-  </div>`;
+  </div>
 
-  if(total === 0) {
-    html += `<div style="background:#0847A8;border:1px solid rgba(255,255,255,.15);border-left:4px solid #FFE900;border-radius:0 10px 10px 0;padding:1rem 1.25rem;margin-bottom:1.5rem">
-      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#FFE900;margin-bottom:.3rem">Aguardando respostas</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.6">Nenhum diretor respondeu ainda. O painel será atualizado automaticamente conforme as respostas chegarem. Clique em <strong style="color:#fff">"Atualizar respostas"</strong> para verificar.</div>
-    </div>`;
-  }
+  <div class="section-title">Status de respostas por departamento</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem;margin-bottom:2rem">
+    ${DEPTS.map(dept=>{
+      const respondeu = responderam.some(r=>r===dept.toLowerCase()||r.includes(dept.toLowerCase()));
+      return `<div style="background:${respondeu?'rgba(68,214,44,.1)':'rgba(255,255,255,.06)'};border:1.5px solid ${respondeu?'#44D62C':'rgba(255,255,255,.15)'};border-radius:10px;padding:.75rem 1rem;display:flex;align-items:center;gap:.6rem">
+        <div style="width:8px;height:8px;border-radius:50%;background:${respondeu?'#44D62C':'rgba(255,255,255,.2)'};flex-shrink:0"></div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:${respondeu?'#44D62C':'rgba(255,255,255,.5)'};text-transform:uppercase;letter-spacing:.03em">${dept}</div>
+          <div style="font-size:10px;color:${respondeu?'rgba(68,214,44,.7)':'rgba(255,255,255,.3)'};margin-top:1px">${respondeu?'Respondido':'Pendente'}</div>
+        </div>
+      </div>`;
+    }).join("")}
+  </div>`;
 
   // EMPRESA DIAGNOSTICO
   html += `<div class="section-title">Diagnóstico da empresa como fomentadora de IA</div>`;
@@ -317,21 +326,20 @@ function renderPainel(dados) {
   if(total > 0) {
     html += `<div class="table-wrap"><table>
     <thead><tr>
-      <th>Área</th><th>Faixa</th><th>Frequência</th><th>Nota empresa</th><th>Top dores</th><th>Principais barreiras</th>
+      <th>Nome</th><th>Área</th><th>Faixa</th><th>Frequência</th><th>Nota empresa</th><th>Top dores</th>
     </tr></thead>
     <tbody>`;
     dados.forEach(d=>{
       const fCls = getFaixaClass(d.faixa_calculada);
       const fNome = d.faixa_calculada ? d.faixa_calculada.split("—")[1]?.trim()||d.faixa_calculada : "—";
       const dores = d.dores_ranking ? d.dores_ranking.split("|").slice(0,2).map(x=>x.replace(/^\d+\.\s*/,"").trim()).join(", ") : "—";
-      const barr = d.barreiras ? d.barreiras.split(",").slice(0,2).map(x=>x.trim()).join(", ") : "—";
       html += `<tr>
+        <td style="font-weight:700;color:#fff">${d.nome||"—"}</td>
         <td>${d.departamento||"—"}</td>
         <td><span class="faixa-pill ${fCls}">${fNome}</span></td>
         <td>${d.frequencia||"—"}</td>
         <td style="text-align:center;font-weight:700;color:#FFE900">${d.nota_empresa||"—"}</td>
         <td style="font-size:11px">${dores}</td>
-        <td style="font-size:11px">${barr}</td>
       </tr>`;
     });
     html += `</tbody></table></div>`;
@@ -362,7 +370,7 @@ function renderPainel(dados) {
     html += `<div class="section-title">Visão livre — o que cada área quer resolver com IA</div>`;
     visoes.forEach(d=>{
       html += `<div style="background:#0847A8;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:1rem 1.25rem;margin-bottom:.6rem">
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#FFE900;margin-bottom:.4rem">${d.departamento||"—"}</div>
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#FFE900;margin-bottom:.4rem">${d.nome||"—"} · ${d.departamento||"—"}</div>
         <div style="font-size:13px;color:rgba(255,255,255,.8);line-height:1.7">${d.visao_livre}</div>
       </div>`;
     });

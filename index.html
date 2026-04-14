@@ -240,7 +240,7 @@ const FAIXAS = [
   {id:"preta",cls:"fb-preta",nivel:5,cor:"#fff",corVazio:"rgba(255,255,255,.15)",nome:"Faixa Preta — Arquiteto",sub:"Construção e liderança em IA",desc:"Você constrói soluções com IA — agentes, workflows, integrações via API. Lidera iniciativas, define estratégia e habilita outras pessoas. É um ativo estratégico da OOH Brasil nesse tema.",next:"Você já chegou no nível mais alto. O próximo passo é escalar: estruture iniciativas formais, documente o que funciona e seja a referência que puxa as demais áreas para frente."}
 ];
 
-const st = {step:1,dept:"",nivel:"",tools:[],freq:"",profund:{},ranking:[],barreiras:[],fomento:"",ofertas:[],comentario:""};
+const st = {step:1,nome:"",dept:"",nivel:"",tools:[],freq:"",profund:{},ranking:[],barreiras:[],fomento:"",ofertas:[],comentario:""};
 
 function calcFaixa() {
   const nivelNum = parseInt(st.nivel)||0;
@@ -261,7 +261,7 @@ function pct() { return Math.round((Math.min(st.step, TOTAL) / TOTAL) * 100); }
 function faltam() { const r = TOTAL - Math.min(st.step, TOTAL); return r <= 0 ? "Concluído" : r + (r===1?" etapa restante":" etapas restantes"); }
 
 function validar(step) {
-  if(step===1) return st.dept !== "";
+  if(step===1) return st.nome.trim().length > 1 && st.dept !== "";
   if(step===2) return st.nivel !== "" && st.freq !== "";
   if(step===3) return Object.values(st.profund).flat().length > 0;
   if(step===4) return st.ranking.length > 0;
@@ -271,7 +271,7 @@ function validar(step) {
 }
 
 function erroMsg(step) {
-  if(step===1) return "Selecione sua área para continuar.";
+  if(step===1) return st.nome.trim().length <= 1 ? "Informe seu nome para continuar." : "Selecione sua área para continuar.";
   if(step===2) return "Responda pelo menos o nível de uso e a frequência para continuar.";
   if(step===3) return "Selecione pelo menos uma atividade que você já realizou com IA.";
   if(step===4) return "Adicione pelo menos uma dor ao seu ranking para continuar.";
@@ -328,9 +328,16 @@ function render() {
 /* ---- STEPS ---- */
 function s1() {
   return `<div class="sec-tag">Identificação</div>
-  <div class="sec-title">Qual é a sua área?</div>
+  <div class="sec-title">Vamos começar</div>
   <div class="sec-desc">As descrições de cada dor serão adaptadas automaticamente ao contexto da sua diretoria.</div>
   <div class="intro-box"><p>Este diagnóstico foi solicitado pelo <strong>Conselho Administrativo da OOH Brasil</strong> e leva cerca de <strong>5 minutos</strong>. Suas respostas serão consolidadas e apresentadas na reunião do dia <strong>15 de abril</strong>.<br><br>Não há respostas certas ou erradas — queremos entender o ponto de partida real de cada área.</p></div>
+  <div class="qblock">
+    <div class="qlabel">Seu nome completo</div>
+    <input type="text" id="nome-input" placeholder="Digite seu nome..." value="${st.nome}"
+      style="width:100%;border:2px solid ${st.nome.trim().length>1?'rgba(255,255,255,.4)':'rgba(255,255,255,.25)'};border-radius:8px;padding:12px 14px;font-size:14px;font-family:inherit;color:#fff;background:rgba(255,255,255,.08);outline:none;margin-bottom:0"
+      oninput="st.nome=this.value;this.style.borderColor=this.value.trim().length>1?'rgba(255,255,255,.4)':'rgba(255,255,255,.25)'">
+  </div>
+  <div class="qlabel" style="margin-bottom:.7rem">Sua área</div>
   <div class="dept-grid">${DEPTS.map(d=>`<button class="dept-btn${st.dept===d?' sel':''}" onclick="st.dept='${d}';render()">${d}</button>`).join("")}</div>
   ${nav(false,"Continuar",2)}`;
 }
@@ -459,6 +466,7 @@ function sRes() {
 
   <div class="sec-tag" style="margin-top:1.5rem">Resumo das respostas</div>
   <div class="res-box">
+    ${row("Nome", st.nome||"—")}
     ${row("Área", st.dept||"—")}
     ${row("Nível de uso", nlbl)}
     ${row("Frequência", st.freq||"—")}
@@ -508,6 +516,7 @@ async function finalizar() {
   const payload = {
     data: {
       timestamp: new Date().toISOString(),
+      nome: st.nome || "Não informado",
       departamento: st.dept || "Não informado",
       nivel_uso: st.nivel || "0",
       ferramentas: st.tools.join(", ") || "Nenhuma",
