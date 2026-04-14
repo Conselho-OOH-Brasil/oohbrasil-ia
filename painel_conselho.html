@@ -84,7 +84,7 @@ tbody td:first-child{font-weight:700;color:#fff}
 .fp-amarela{background:rgba(255,233,0,.2);color:#FFE900}
 .fp-verde{background:rgba(68,214,44,.2);color:#44D62C}
 .fp-rosa{background:rgba(255,25,105,.2);color:#FF1969}
-.fp-preta{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.5)}
+.fp-preta{background:#000000;color:#fff;border:1px solid #000000}
 
 /* DORES RANKING */
 .dores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.6rem;margin-bottom:2rem}
@@ -145,11 +145,11 @@ const SENHA = "00hbr@sil2026";
 const SHEET_URL = "https://sheetdb.io/api/v1/zcwbo5ibo6n6e";
 
 const FAIXAS_DEF = [
-  {id:"branca",nome:"Faixa Branca — Observador",cls:"fp-branca",bar:"rgba(255,255,255,0.6)"},
-  {id:"amarela",nome:"Faixa Amarela — Explorador",cls:"fp-amarela",bar:"#FFE900"},
-  {id:"verde",nome:"Faixa Verde — Praticante",cls:"fp-verde",bar:"#44D62C"},
-  {id:"rosa",nome:"Faixa Rosa — Multiplicador",cls:"fp-rosa",bar:"#FF1969"},
-  {id:"preta",nome:"Faixa Preta — Arquiteto",cls:"fp-preta",bar:"rgba(255,255,255,0.9)"}
+  {id:"branca",nome:"Faixa Branca — Observador",cls:"fp-branca",bar:"rgba(255,255,255,0.6)",cor:"#fff",corVazio:"rgba(255,255,255,.15)",nivel:1},
+  {id:"amarela",nome:"Faixa Amarela — Explorador",cls:"fp-amarela",bar:"#FFE900",cor:"#FFE900",corVazio:"rgba(255,233,0,.15)",nivel:2},
+  {id:"verde",nome:"Faixa Verde — Praticante",cls:"fp-verde",bar:"#44D62C",cor:"#44D62C",corVazio:"rgba(68,214,44,.15)",nivel:3},
+  {id:"rosa",nome:"Faixa Rosa — Multiplicador",cls:"fp-rosa",bar:"#FF1969",cor:"#FF1969",corVazio:"rgba(255,25,105,.15)",nivel:4},
+  {id:"preta",nome:"Faixa Preta — Arquiteto",cls:"fp-preta",bar:"#000000",cor:"#fff",corVazio:"rgba(255,255,255,.15)",nivel:5}
 ];
 
 function login() {
