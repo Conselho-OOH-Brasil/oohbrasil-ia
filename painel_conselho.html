@@ -313,7 +313,7 @@ function renderPainel(dados) {
     const dores = d.dores_ranking ? d.dores_ranking.split("|").slice(0,2).map(x=>x.replace(/^\d+\.\s*/,"").trim()).join(", ") : "—";
     const barr = d.barreiras ? d.barreiras.split(",").slice(0,2).map(x=>x.trim()).join(", ") : "—";
     html += `<tr>
-      <td>${d.area||"—"}</td>
+      <td>${d.departamento||"—"}</td>
       <td><span class="faixa-pill ${fCls}">${fNome}</span></td>
       <td>${d.frequencia||"—"}</td>
       <td style="text-align:center;font-weight:700;color:#FFE900">${d.nota_empresa||"—"}</td>
@@ -344,7 +344,7 @@ function renderPainel(dados) {
     html += `<div class="section-title">Visão livre — o que cada área quer resolver com IA</div>`;
     visoes.forEach(d=>{
       html += `<div style="background:#0847A8;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:1rem 1.25rem;margin-bottom:.6rem">
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#FFE900;margin-bottom:.4rem">${d.area||"—"}</div>
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#FFE900;margin-bottom:.4rem">${d.departamento||"—"}</div>
         <div style="font-size:13px;color:rgba(255,255,255,.8);line-height:1.7">${d.visao_livre}</div>
       </div>`;
     });
@@ -359,7 +359,7 @@ async function carregarDados() {
     const res = await fetch(SHEET_URL + "?limit=50");
     if(!res.ok) throw new Error("HTTP " + res.status);
     const dados = await res.json();
-    const limpos = dados.filter(d=>d.area && d.area !== "TESTE");
+    const limpos = dados.filter(d=>d.timestamp && d.timestamp.length > 0);
     renderPainel(limpos);
   } catch(e) {
     document.getElementById("conteudo").innerHTML = `

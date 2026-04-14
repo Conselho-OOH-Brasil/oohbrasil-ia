@@ -504,7 +504,7 @@ async function finalizar() {
   const payload = {
     data: {
       timestamp: new Date().toISOString(),
-      area: st.dept || "Não informado",
+      departamento: st.dept || "Não informado",
       nivel_uso: st.nivel || "0",
       ferramentas: st.tools.join(", ") || "Nenhuma",
       frequencia: st.freq || "Não informado",
