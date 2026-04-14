@@ -220,7 +220,10 @@ const DORES = [
 const NIVEIS = [{v:"0",l:"Nunca usei IA no trabalho"},{v:"1",l:"Explorei algumas vezes"},{v:"2",l:"Uso ocasionalmente"},{v:"3",l:"Uso regularmente"},{v:"4",l:"IA integrada à minha rotina"}];
 const TOOLS = ["ChatGPT","Copilot","Gemini","Claude","Perplexity","Outra"];
 const FREQ = ["Nunca","Raramente","1–2x por semana","Quase todo dia","Todo dia"];
-const BARR = ["Falta de tempo para aprender","Não sei por onde começar","Preocupação com segurança de dados","Ferramentas não integradas","Sem política clara da empresa","Resultados inconsistentes","Resistência do time","Não vejo aplicação clara na minha área"];
+const BARR_INICIANTE={titulo:"O que te impede de começar ou avançar com IA?",desc:"Você está no início da jornada — entender o que trava é o primeiro passo para mudar. Pode marcar mais de uma.",itens:["Falta de tempo para aprender","Não sei por onde começar","Não vejo aplicação clara na minha rotina","Preocupação com segurança e confidencialidade dos dados","Receio de depender de uma ferramenta que não entendo bem","Falta de incentivo ou direcionamento da empresa","Já tentei mas os resultados foram inconsistentes","Não tenho acesso a ferramentas adequadas"]};
+const BARR_INTERMEDIARIO={titulo:"O que trava o aprofundamento do seu uso de IA?",desc:"Você já usa IA — mas algo impede de ir mais longe. Identifique o que está travando sua evolução.",itens:["Falta de tempo para explorar além do básico","Não sei como integrar IA às ferramentas que já uso","Ausência de treinamentos mais avançados","Falta de casos de uso claros para minha área","Preocupação com qualidade e confiabilidade dos resultados","Sem política clara da empresa sobre o que pode usar","Dificuldade em replicar para o time","Falta de apoio técnico interno para avançar"]};
+const BARR_AVANCADO={titulo:"O que limita escalar IA na sua área e na empresa?",desc:"Você já domina o uso — mas algo impede de transformar isso em iniciativas de impacto real. O que está travando?",itens:["Falta de infraestrutura ou integração com sistemas da empresa","Ausência de política corporativa clara de IA","Dificuldade em engajar o time para adotar o que funciona","Falta de orçamento para ferramentas mais robustas","Processos internos que resistem à automação","Sem um responsável formal de IA na empresa","Dificuldade em medir e demonstrar o ROI das iniciativas","Falta de apoio da liderança para projetos mais ambiciosos"]};
+function getBarrByFaixa(){const f=calcFaixa();if(f.id==="rosa"||f.id==="preta")return BARR_AVANCADO;if(f.id==="verde")return BARR_INTERMEDIARIO;return BARR_INICIANTE;}
 const OFERTAS = ["Treinamentos práticos","Ferramentas licenciadas","Política clara de uso","Projetos piloto com apoio","Responsável interno de IA","Tempo para experimentar"];
 
 function barrasIcon(nivel, cor, corVazio) {
@@ -392,10 +395,11 @@ function s4() {
 }
 
 function s5() {
+  const barr = getBarrByFaixa();
   return `<div class="sec-tag">Bloco 4 — Barreiras</div>
-  <div class="sec-title">O que trava a adoção de IA na sua área?</div>
-  <div class="sec-desc">Entender os freios é tão importante quanto mapear as oportunidades. Pode marcar mais de uma.</div>
-  <div class="dor-pool">${BARR.map(b=>`<div class="dor-item${st.barreiras.includes(b)?' barr-sel':''}" onclick="tog(st.barreiras,'${b}');render()"><div class="dor-item-t">${b}</div></div>`).join("")}</div>
+  <div class="sec-title">${barr.titulo}</div>
+  <div class="sec-desc">${barr.desc}</div>
+  <div class="dor-pool">${barr.itens.map(b=>`<div class="dor-item${st.barreiras.includes(b)?' barr-sel':''}" onclick="tog(st.barreiras,'${b.replace(/'/g,"\\'")}');render()"><div class="dor-item-t">${b}</div></div>`).join("")}</div>
   ${nav(true,"Continuar",6)}`;
 }
 
